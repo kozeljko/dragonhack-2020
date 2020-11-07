@@ -8,6 +8,13 @@ function setLangLat(latLng) {
     document.getElementById("langCoord").innerHTML = latLng.lng;
 }
 
+function clearLangLat() {    
+    document.getElementById("latCoord").innerHTML = "None";
+    document.getElementById("langCoord").innerHTML = "None";
+
+    clearMarker();
+}
+
 function applyLangLat(){    
     const lat = document.getElementById("latCoord").innerHTML;
     const lng = document.getElementById("langCoord").innerHTML;

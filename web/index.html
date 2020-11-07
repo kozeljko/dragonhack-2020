@@ -66,8 +66,21 @@
             <h2>Options</h2>
 
             <hr/>
+            
+            <h3>Layer</h3>
+                <form class="form-inline">
+                    <div class="form-group col-12">
+                        <label for="selectLayer" class="mr-2">Selected layer:</label>
+                        <select onchange="layerChange()" class="form-control col-8" style="width: 250px" id="selectLayer">
+                            <option value="default">Normal map</option>
+                            <option value="one">Sexy map</option>
+                            <option value="two">Sexier map</option>
+                        </select>
+                    </div>
+                </form>
+            <hr/>
 
-            <h2>Coordinates</h2>
+            <h3>Coordinates</h3>
 
             <!-- Coords -->
             <dl class="row">
@@ -77,13 +90,14 @@
                 <dd id="langCoord" class="col-9">None</dd>
 
                 <button type="button" class="btn btn-dark" style="margin-left: 15px" onclick="applyLangLat();">Apply</button>
+                <button type="button" class="btn btn-secondary" style="margin-left: 15px" onclick="clearLangLat();">Clear</button>
             </dl>
 
             <hr/>
 
             <h3>Details</h3>
 
-            <span>Select point</span>
+            <span>Select point...</span>
         </div>
     </div>
 </div>
