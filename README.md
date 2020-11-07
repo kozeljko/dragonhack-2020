@@ -1,1 +1,1 @@
-# dragonhack-2020
+# DragonHack 2020
