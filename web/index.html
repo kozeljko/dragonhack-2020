@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta http-equiv="x-ua-compatible" content="ie=edge, chrome=1"/>
+    <meta
+            name="viewport"
+            content="width=device-width, initial-scale=1, shrink-to-fit=no"
+    />
+    <title>Sentinel Hub WMS services with Leaflet</title>
+    <style>
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            width: 100%;
+        }
+
+        #sentinelMap {
+            height: 100%;
+            width: 100%;
+        }
+    </style>
+
+    <link
+            rel="stylesheet"
+            href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css"
+            integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2"
+            crossorigin="anonymous"
+    />
+    <link
+            rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.2.0/leaflet.css"
+    />
+    />
+    <link
+            rel="stylesheet"
+            href="index.css"
+    />
+    <script
+            src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
+            integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
+            crossorigin="anonymous"
+    ></script>
+    <script
+            src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-ho+j7jyWK8fNQe+A12Hb8AhRq26LrZ/JpcUGGOn+Y7RsweNrtN/tE3MoK7ZeZDyx"
+            crossorigin="anonymous"
+    ></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.2.0/leaflet.js"></script>
+    <script src="index.js"></script>
+</head>
+
+<body>
+<div class="container" style="height: 100%; max-width: 100%">
+    <h1>Dank Nevada memes</h1>
+    <div class="row" style="height: 95%">
+        <div class="col-9 bg-white rounded " style="height: 100%">
+            <div id="sentinelMap"></div>
+            <script>
+                let marker;
+                // OpenStreetMap
+                let osm = L.tileLayer("http://{s}.tile.osm.org/{z}/{x}/{y}.png", {
+                    attribution:
+                        '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+                });
+
+                // Sentinel Hub WMS service
+                // tiles generated using EPSG:3857 projection - Leaflet takes care of that
+                let baseUrl =
+                    "https://services.sentinel-hub.com/ogc/wms/ca37eeb6-0a1f-4d1b-8751-4f382f63a325";
+                let sentinelHub = L.tileLayer.wms(baseUrl, {
+                    tileSize: 512,
+                    attribution:
+                        '&copy; <a href="http://www.sentinel-hub.com/" target="_blank">Sentinel Hub</a>',
+                    urlProcessingApi:
+                        "https://services.sentinel-hub.com/ogc/wms/aeafc74a-c894-440b-a85b-964c7b26e471",
+                    maxcc: 0,
+                    minZoom: 6,
+                    maxZoom: 16,
+                    preset: "CUSTOM",
+                    evalscript: "cmV0dXJuIFtCMDEqMi41LEIwMSoyLjUsQjA0KjIuNV0=",
+                    evalsource: "S2",
+                    PREVIEW: 3,
+                    layers: "NDVI",
+                    time: "2020-05-01/2020-11-07"
+                });
+
+                let baseMaps = {
+                    OpenStreetMap: osm
+                };
+                let overlayMaps = {
+                    "Sentinel Hub WMS": sentinelHub
+                };
+
+                let map = L.map("sentinelMap", {
+                    center: [8.463033827391877, 4.56756591796875], // lat/lng in EPSG:4326
+                    zoom: 12,
+                    layers: [osm, sentinelHub]
+                });
+
+                // Function for handling user click.
+                map.on('click', function(e){
+                    if (marker === undefined){
+                        marker = L.marker(e.latlng).addTo(map);
+                    } else {
+                        marker.setLatLng(e.latlng);
+                    }
+
+                    setLangLat(e.latlng);
+                });
+
+                L.control.layers(baseMaps, overlayMaps).addTo(map);
+            </script>
+        </div>
+        <div class="col-3 shadow p-3 bg-white rounded pr-5" style="height: 100%">
+            <h3>Options</h3>
+
+            <!-- Coords -->
+            <dl class="row">
+                <dt class="col-3">Lat: </dt>
+                <dd id="latCoord" class="col-9">None</dd>
+                <dt class="col-3">Lang: </dt>
+                <dd id="langCoord" class="col-9">None</dd>
+
+                <button type="button" class="btn btn-dark" style="margin-left: 15px" onclick="applyLangLat();">Apply</button>
+            </dl>
+
+            <h3>Details</h3>
+
+            <span>Select point</span>
+        </div>
+    </div>
+</div>
+</body>
+</html>
