@@ -105,11 +105,11 @@ def get_classification_request(time_interval, betsiboka_bbox, betsiboka_size, co
                 return colorMap[scl];
             }
 
-            function updateOutputMetadata(outputMetadata){
+            function updateOutputMetadata(scenes, inputMetadata, outputMetadata){
                 for (let scl in scl_dict){
                     scl_dict[scl] = scl_dict[scl] / count;
                 }
-                outputMetadata.userdata = {"scl": scl_dict}
+                outputMetadata.userData = {"scl": scl_dict}
             }
         """
 
@@ -153,17 +153,20 @@ def main():
     end_time = datetime.datetime(2020, 11, 1)
 
     # divide into weeks
-    n_chunks = 2
-    #n_chunks = 44
-    tdelta = (end_time - start_time) / n_chunks
+    # n_chunks = 12 + 1
+    # n_chunks = 88 + 1
+    tmp = (end_time - start_time)
+    n_chunks = tmp.days
+    tdelta = tmp / n_chunks
     edges = [(start_time + i * tdelta).date().isoformat() for i in range(n_chunks)]
     slots = [(edges[i], edges[i + 1]) for i in range(len(edges) - 1)]
 
 
 
-    # set coordinates, bounding box and a resolution (Naklo) TODO
-    # [Longitude (x), Latitude (y) ... ]
-    betsiboka_coords_wgs84 = [14.2864, 46.2335, 14.3741, 46.2912]
+    # set coordinates, bounding box and a resolution (Naklo) TODO -> use input coordinates
+    # [Longitude (x1), Latitude (y1) ... ]
+    # betsiboka_coords_wgs84 = [14.2864, 46.2335, 14.3741, 46.2912] # Naklo
+    betsiboka_coords_wgs84 = [14.3964, 46.2369, 14.4555, 46.2744]
     resolution = 10
     betsiboka_bbox = BBox(bbox=betsiboka_coords_wgs84, crs=CRS.WGS84)
     betsiboka_size = bbox_to_dimensions(betsiboka_bbox, resolution=resolution)
@@ -179,19 +182,31 @@ def main():
     # download data with multiple threads
     data = SentinelHubDownloadClient(config=config).download(list_of_requests, max_threads=5)
 
-    true_color_imgs = data[0]
 
-    print(f'Returned data is of type = {type(true_color_imgs)} and length {len(true_color_imgs)}.')
-    # print(
-    #     f'Single element in the list is of type {type(true_color_imgs[-1])} and has shape {true_color_imgs[-1].shape}')
 
-    image = true_color_imgs["default.tif"]
-    print(f'Image type: {image.dtype}')
+    # TODO -> do the multiple file thing
+    res = []
+    for i, img in enumerate(data):
+        image = img["default.tif"]
+        classes = img["userdata.json"]["scl"]
+        classes["date"] = datetime.datetime.strptime(edges[i], '%Y-%m-%d').date().replace(day=1)
+        res.append(classes)
 
-    # plot function
-    # factor 1/255 to scale between 0-1
-    # factor 3.5 to increase brightness
-    plot_image(image, factor=3.5 / 255, clip_range=(0, 1))
+        # plot function
+        # factor 1/255 to scale between 0-1
+        # factor 3.5 to increase brightness
+        # plot_image(image, factor=3.5 / 255, clip_range=(0, 1))
+        # if i % 4 == 0:
+        #    plot_image(image, factor=1 / 255, clip_range=(0, 1))
+
+    df = pd.DataFrame(res)
+    # df = df.fillna(0)
+
+    proc = pd.DataFrame()
+    proc['date'] = df.groupby(['date'], sort=True)['date'].max()
+    proc['vegetation'] = df.groupby(['date'], sort=True)['vegetation'].max().round(decimals=2)
+    proc['snow'] = df.groupby(['date'], sort=True)['snow'].max().round(decimals=2)
+    print(proc)
 
 
 api = Flask(__name__)
