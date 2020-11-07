@@ -33,7 +33,6 @@
             rel="stylesheet"
             href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.2.0/leaflet.css"
     />
-    />
     <link
             rel="stylesheet"
             href="index.css"
@@ -49,7 +48,9 @@
             crossorigin="anonymous"
     ></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.2.0/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script src="index.js"></script>
+    <script src="map.js"></script>
 </head>
 
 <body>
@@ -59,63 +60,14 @@
         <div class="col-9 bg-white rounded " style="height: 100%">
             <div id="sentinelMap"></div>
             <script>
-                let marker;
-                // OpenStreetMap
-                let osm = L.tileLayer("http://{s}.tile.osm.org/{z}/{x}/{y}.png", {
-                    attribution:
-                        '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
-                });
-
-                // Sentinel Hub WMS service
-                // tiles generated using EPSG:3857 projection - Leaflet takes care of that
-                let baseUrl =
-                    "https://services.sentinel-hub.com/ogc/wms/ca37eeb6-0a1f-4d1b-8751-4f382f63a325";
-                let sentinelHub = L.tileLayer.wms(baseUrl, {
-                    tileSize: 512,
-                    attribution:
-                        '&copy; <a href="http://www.sentinel-hub.com/" target="_blank">Sentinel Hub</a>',
-                    urlProcessingApi:
-                        "https://services.sentinel-hub.com/ogc/wms/aeafc74a-c894-440b-a85b-964c7b26e471",
-                    maxcc: 0,
-                    minZoom: 6,
-                    maxZoom: 16,
-                    preset: "CUSTOM",
-                    evalscript: "cmV0dXJuIFtCMDEqMi41LEIwMSoyLjUsQjA0KjIuNV0=",
-                    evalsource: "S2",
-                    PREVIEW: 3,
-                    layers: "NDVI",
-                    time: "2020-05-01/2020-11-07"
-                });
-
-                let baseMaps = {
-                    OpenStreetMap: osm
-                };
-                let overlayMaps = {
-                    "Sentinel Hub WMS": sentinelHub
-                };
-
-                let map = L.map("sentinelMap", {
-                    center: [8.463033827391877, 4.56756591796875], // lat/lng in EPSG:4326
-                    zoom: 12,
-                    layers: [osm, sentinelHub]
-                });
-
-                // Function for handling user click.
-                map.on('click', function(e){
-                    if (marker === undefined){
-                        marker = L.marker(e.latlng).addTo(map);
-                    } else {
-                        marker.setLatLng(e.latlng);
-                    }
-
-                    setLangLat(e.latlng);
-                });
-
-                L.control.layers(baseMaps, overlayMaps).addTo(map);
             </script>
         </div>
         <div class="col-3 shadow p-3 bg-white rounded pr-5" style="height: 100%">
-            <h3>Options</h3>
+            <h2>Options</h2>
+
+            <hr/>
+
+            <h2>Coordinates</h2>
 
             <!-- Coords -->
             <dl class="row">
@@ -126,6 +78,8 @@
 
                 <button type="button" class="btn btn-dark" style="margin-left: 15px" onclick="applyLangLat();">Apply</button>
             </dl>
+
+            <hr/>
 
             <h3>Details</h3>
 
