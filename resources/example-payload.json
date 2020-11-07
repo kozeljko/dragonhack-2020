@@ -1,0 +1,12 @@
+{
+  "bbox": [1.0, 2.0, 3.0, 4.0],
+  "values": [
+    {
+      "name": "Cloudiness",
+      "value": 0.5
+    }, {
+      "name": "Snowiness",
+      "value": 0.86
+    }
+  ]
+}

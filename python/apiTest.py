@@ -7,9 +7,11 @@ from sentinelhub import SHConfig
 import time
 from sentinelhub import MimeType, CRS, BBox, SentinelHubRequest, SentinelHubDownloadClient, \
     DataCollection, bbox_to_dimensions, DownloadRequest
+from flask import Flask, json, request, jsonify
+from flask_cors import CORS
 
 
-def plot_image(image, factor=1.0, clip_range = None, **kwargs):
+def plot_image(image, factor=1.0, clip_range=None, **kwargs):
     """
     Utility function for plotting RGB images.
     """
@@ -24,7 +26,6 @@ def plot_image(image, factor=1.0, clip_range = None, **kwargs):
 
 
 def main():
-
     # set configuration
     CLIENT_ID = ''
     CLIENT_SECRET = ''
@@ -44,7 +45,6 @@ def main():
     betsiboka_size = bbox_to_dimensions(betsiboka_bbox, resolution=resolution)
 
     print(f'Image shape at {resolution} m resolution: {betsiboka_size} pixels')
-
 
     evalscript_true_color = """
         //VERSION=3
@@ -67,7 +67,7 @@ def main():
             SentinelHubRequest.input_data(
                 data_collection=DataCollection.SENTINEL2_L1C,
                 time_interval=('2020-06-01', '2020-06-13'),
-                #mosaicking_order='leastCC'
+                # mosaicking_order='leastCC'
             )
         ],
         responses=[
@@ -93,7 +93,28 @@ def main():
     plot_image(image, factor=3.5 / 255, clip_range=(0, 1))
 
 
+api = Flask(__name__)
+CORS(api, support_credentials=True)
+
+
+@api.route('/api', methods=['POST'])
+def magic_endpoint():
+    payload = request.get_json()
+
+    lat = float(payload['lat'])
+    lng = float(payload['lng'])
+
+    print("Received coordinates: (" + str(lat) + ", " + str(lng) + ")")
+
+    # TODO Actually call logic.
+    response = jsonify({'bbox': [[lat + 0.05, lng - 0.05], [lat - 0.05, lng + 0.05]]})
+    response.headers.add('Access-Control-Allow-Origin', '*')
+
+    return response
+
+
 if __name__ == "__main__":
     start = time.time()
-    main()
+    # main()
+    api.run()
     print("Time taken: " + str(time.time() - start))
