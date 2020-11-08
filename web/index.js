@@ -4,7 +4,25 @@ let highChart;
 const chartCombos = {
     default: {
         name: "Weather data",
-        tickInterval: 3 * 30 * 24 * 3600 * 1000
+        tickInterval: 3 * 30 * 24 * 3600 * 1000,
+        yAxis: [{
+            id: "temp",
+            labels: {
+                format: '{value}°C'
+            },
+            title: {
+                text: 'Temperature'
+            },
+            opposite: true
+        }, {
+            id: "pad",
+            labels: {
+                format: '{value}cm2'
+            },
+            title: {
+                text: 'Fall units'
+            }
+        }]
     }
 }
 
@@ -12,22 +30,26 @@ const weatherSeries = [{
     key: 'maxtempC',
     name: 'Max temperature',
     unit: '°C',
-    color: 'darkgreen'
+    color: 'darkgreen',
+    yAxis: 'temp'
 },{
     key: 'mintempC',
     name: 'Min temperature',
     unit: '°C',
-    color: 'green'
+    color: 'green',
+    yAxis: 'temp'
 },{
     key: 'totalSnow_cm',
-    name: 'Max temperature',
+    name: 'Snow',
     unit: 'cm2',
-    color: 'darkblue'
+    color: 'darkblue',
+    yAxis: 'pad'
 },{
     key: 'precipMM',
-    name: 'The fuck',
-    unit: '°C',
-    color: 'blue'
+    name: 'Precipitation',
+    unit: 'cm2',
+    color: 'blue',
+    yAxis: 'pad'
 }];
 
 const axiosInstance = axios.create({
@@ -68,7 +90,7 @@ function applyLangLat(){
             'lat': lat,
             'lng': lng
         },
-        timeout: 10000
+        timeout: 100000
     }).then(function (response) {
         const data = response.data;
         console.log(data);
@@ -81,8 +103,6 @@ function applyLangLat(){
 
         pointApplied = true;
         handlePointApplied();
-
-        initChart();
     })
 }
 
@@ -123,17 +143,26 @@ function prepareSeries(payload) {
 function determineChart() {
     const currentLayer = getLayerId();
 
+    console.log(weatherSeries);
+    
     initChart(chartCombos.default, weatherSeries)
 }
 
 function initChart(chart, seriesArray) {
+    console.log(seriesArray);
     const preparedSeries = seriesArray.map(o => {
         let output = {}
         output.name = o.name;
         output.data = o.series;
+        output.yAxis = o.yAxis;
+        output.tooltip = {
+            valueSuffix: o.unit
+        }
+        return output;
     })
 
     console.log(preparedSeries);
+    console.log(chart.yAxis);
     
     
     highChart = Highcharts.chart('chartContainer', {
@@ -141,11 +170,7 @@ function initChart(chart, seriesArray) {
             text: chart.name
         },
     
-        yAxis: {
-            title: {
-                text: 'Some cool metric'
-            }
-        },
+        yAxis: chart.yAxis,
     
         xAxis: {
             type: 'datetime',
@@ -156,9 +181,10 @@ function initChart(chart, seriesArray) {
             enabled: false
         },
 
+        colors: ['darkgreen', 'green', 'darkblue', 'blue'],
+
         plotOptions: {
             series: {
-                color: 'darkgreen',
                 type: 'spline'
             }
         },
