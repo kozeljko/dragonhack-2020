@@ -1,5 +1,6 @@
 import os
 import datetime
+import math
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -172,7 +173,11 @@ def snowyVegetation(betsiboka_bbox, betsiboka_size, config):
     values = proc.to_numpy()
     res = []
     for i in range(0, len(values)):
-        res.append({"time": values[i, 0].isoformat(), "value": values[i, 1]})
+        value = values[i, 1]
+        if math.isnan(value):
+            value = 0.0
+
+        res.append({"time": values[i, 0].isoformat(), "value": value * 10.0})
     return res
 
 
@@ -215,13 +220,13 @@ def do_magic(lat, lng):
     # [Longitude (x1), Latitude (y1) ... ]
     # betsiboka_coords_wgs84 = [14.2864, 46.2335, 14.3741, 46.2912]  # Naklo
     # betsiboka_coords_wgs84 = [14.3964, 46.2369, 14.4555, 46.2744]  # Sencur
-    bbox = get_bounding_box(lat, lng, 10000)
+    bbox = get_bounding_box(lat, lng, 5000)
     payload['bbox'] = [[bbox[0], bbox[3]], [bbox[2], bbox[1]]]
 
     #if 1 == 1:
     #    return payload
 
-    resolution = 40
+    resolution = 20
     betsiboka_bbox = BBox(bbox=bbox, crs=CRS.WGS84)
     betsiboka_size = bbox_to_dimensions(betsiboka_bbox, resolution=resolution)
 
@@ -233,8 +238,6 @@ def do_magic(lat, lng):
 
     vegData = snowyVegetation(betsiboka_bbox, betsiboka_size, config)
     payload['vegetation'] = vegData
-
-    # print(payload)
 
     return payload
 

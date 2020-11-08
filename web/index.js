@@ -115,9 +115,9 @@ function applyLangLat(){
         timeout: 100000
     }).then(function (response) {
         const data = response.data;
-        console.log(data);
         
-        const bbox = data.bbox;
+        const bbox = data['bbox'];
+
         addBoundingBox(bbox);
 
         prepareSeries(data);
@@ -128,6 +128,7 @@ function applyLangLat(){
 
         document.getElementById('spinyBoy').style.display = 'none';
     }).catch(function (e) {
+        console.log(e);
         document.getElementById('spinyBoy').style.display = 'block';
     })
 }
@@ -156,21 +157,19 @@ function prepareSeries(payload) {
     // Weather
     const weatherData = payload['weather'];
     weatherSeries.forEach(function(config) {
-        const timeSeries = weatherData[config.key]
+        const timeSeries = weatherData[config.key];
         config.series = timeSeries.map(o => [Date.parse(o['time']), parseFloat(o['value'])])
-    })
+    });
 
     // Vegetation
     const vegData = payload['vegetation'];
     vegSeries.forEach(function(config){
-        // TODO
+        config.series = vegData.map(o => [Date.parse(o['time']), parseFloat(o['value'])])
     })
 }
 
 function determineChart() {
     const currentLayer = getLayerId();
-    console.log(currentLayer);
-    
 
     if (currentLayer === 'default') {
         initChart(chartCombos.default, weatherSeries);
@@ -180,7 +179,6 @@ function determineChart() {
 }
 
 function initChart(chart, seriesArray) {
-    console.log(seriesArray);
     const preparedSeries = seriesArray.map(o => {
         let output = {}
         output.name = o.name;
