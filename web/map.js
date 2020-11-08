@@ -46,12 +46,12 @@ function addBoundingBox(bbox) {
 }
 
 function clearMarker() {
-    if (marker != undefined) {
+    if (marker !== undefined) {
         map.removeLayer(marker);
         marker = undefined;
     }
 
-    if (rectangle != undefined) {
+    if (rectangle !== undefined) {
         map.removeLayer(rectangle);
         rectangle = undefined;
     }
@@ -63,6 +63,7 @@ function layerChange() {
 
     map.removeLayer(currentLayer);
     selectedLayer.addTo(map);
+    currentLayer = selectedLayer;
 }
 
 // This functions needs to be filled out in order to set up all layers.
