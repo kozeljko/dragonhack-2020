@@ -76,7 +76,7 @@ function getLayerId() {
 }
 
 // This functions needs to be filled out in order to set up all layers.
-function buildLayerMap(){
+function buildLayerMap() {
     // OpenStreetMap
     let osm = L.tileLayer("http://{s}.tile.osm.org/{z}/{x}/{y}.png", {
         attribution:
@@ -87,36 +87,20 @@ function buildLayerMap(){
     // tiles generated using EPSG:3857 projection - Leaflet takes care of that
     let baseUrl =
         "https://services.sentinel-hub.com/ogc/wms/ca37eeb6-0a1f-4d1b-8751-4f382f63a325";
+
     let sentinelHub = L.tileLayer.wms(baseUrl, {
         tileSize: 512,
-        attribution:
-            '&copy; <a href="http://www.sentinel-hub.com/" target="_blank">Sentinel Hub</a>',
-        urlProcessingApi:
-            "https://services.sentinel-hub.com/ogc/wms/aeafc74a-c894-440b-a85b-964c7b26e471",
-        maxcc: 0,
+        attribution: '&copy; <a href="http://www.sentinel-hub.com/" target="_blank">Sentinel Hub</a>',
+        urlProcessingApi: "https://services.sentinel-hub.com/ogc/wms/aeafc74a-c894-440b-a85b-964c7b26e471",
+        maxcc: 20,
         minZoom: 6,
         maxZoom: 16,
-        preset: "CUSTOM",
-        evalscript: "cmV0dXJuIFtCMDEqMi41LEIwMSoyLjUsQjA0KjIuNV0=",
-        evalsource: "S2",
-        PREVIEW: 3,
-        layers: "NDVI",
-        time: "2020-05-01/2020-11-07"
-    });
-    let agriHub = L.tileLayer.wms(baseUrl, {
-        tileSize: 512,
-        attribution: '&copy; <a href="http://www.sentinel-hub.com/" target="_blank">Sentinel Hub</a>',
-                           urlProcessingApi:"https://services.sentinel-hub.com/ogc/wms/aeafc74a-c894-440b-a85b-964c7b26e471", 
-                        maxcc:20, 
-                        minZoom:6, 
-                        maxZoom:16, 
-                        preset:"AGRICULTURE", 
-                        layers:"AGRICULTURE", 
-                        time:"2020-05-01/2020-11-07", 
-    
+        preset: "DRAGONHACK",
+        layers: "DRAGONHACK",
+        time: "2020-05-01/2020-11-08",
+
     });
 
     layerMap.default = osm;
     layerMap.one = sentinelHub;
-    layerMap.two = agriHub;
 }

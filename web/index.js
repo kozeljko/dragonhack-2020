@@ -142,7 +142,9 @@ function isPointApplied() {
 }
 
 function handleLayerChange() {
-    determineChart();
+    if (pointApplied) {
+            determineChart();
+    }
 }
 
 function prepareSeries(payload) {
