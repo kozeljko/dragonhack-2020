@@ -166,7 +166,7 @@ def snowyVegetation(betsiboka_bbox, betsiboka_size, config):
 
     proc = pd.DataFrame()
     proc['date'] = df.groupby(['date'], sort=True)['date'].max()
-    proc['vegetation'] = df.groupby(['date'], sort=True)['vegetation'].max().round(decimals=2)
+    proc['vegetation'] = df.groupby(['date'], sort=True)['vegetation'].max().round(decimals=6)
     # proc['snow'] = df.groupby(['date'], sort=True)['snow'].max().round(decimals=2)
 
     # return only for vegetation
@@ -177,7 +177,7 @@ def snowyVegetation(betsiboka_bbox, betsiboka_size, config):
         if math.isnan(value):
             value = 0.0
 
-        res.append({"time": values[i, 0].isoformat(), "value": value * 10.0})
+        res.append({"time": values[i, 0].isoformat(), "value": value * 100000.0})
     return res
 
 
@@ -245,5 +245,5 @@ def do_magic(lat, lng):
 if __name__ == "__main__":
     start = time.time()
     api.run()
-    # do_magic(8.49750009121942, 4.54936981201172)
+    # print(do_magic(46.23970213627493, 14.360847473144533))
     print("Time taken: " + str(time.time() - start))
