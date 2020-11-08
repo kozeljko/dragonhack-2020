@@ -142,7 +142,7 @@ def snowyVegetation(betsiboka_bbox, betsiboka_size, config):
     # divide into weeks
     # n_chunks = 12 + 1
     n_chunks = 68 + 1
-    tdelta =  (end_time - start_time) / n_chunks
+    tdelta = (end_time - start_time) / n_chunks
     edges = [(start_time + i * tdelta).date().isoformat() for i in range(n_chunks)]
     slots = [(edges[i], edges[i + 1]) for i in range(len(edges) - 1)]
 
@@ -223,8 +223,9 @@ def main():
     print(f'Image shape at {resolution} m resolution: {betsiboka_size} pixels')
 
     # get snow and vegetation data
-    # snowyVegetation(betsiboka_bbox, betsiboka_size, config)
     weatherDragons(betsiboka_coords_wgs84)
+    # snowyVegetation(betsiboka_bbox, betsiboka_size, config)
+
 
 
 if __name__ == "__main__":
