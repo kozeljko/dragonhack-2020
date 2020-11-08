@@ -68,6 +68,10 @@ function layerChange() {
     handleLayerChange(selectedValue);
 }
 
+function getLayerId() {
+    return currentLayer;
+}
+
 // This functions needs to be filled out in order to set up all layers.
 function buildLayerMap(){
     // OpenStreetMap
