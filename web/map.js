@@ -1,6 +1,7 @@
 let marker;
 let rectangle;
 let map;
+let currentLayerId;
 let currentLayer;
 let layerMap = {};
 
@@ -8,6 +9,7 @@ let layerMap = {};
 document.addEventListener("DOMContentLoaded", function () {
     buildLayerMap();
 
+    currentLayerId = 'default';
     currentLayer = layerMap.default;
     map = L.map("sentinelMap", {
         center: [8.463033827391877, 4.56756591796875], // lat/lng in EPSG:4326
@@ -63,13 +65,14 @@ function layerChange() {
 
     map.removeLayer(currentLayer);
     selectedLayer.addTo(map);
+    currentLayerId = selectedValue;
     currentLayer = selectedLayer;
 
     handleLayerChange(selectedValue);
 }
 
 function getLayerId() {
-    return currentLayer;
+    return currentLayerId;
 }
 
 // This functions needs to be filled out in order to set up all layers.

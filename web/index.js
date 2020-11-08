@@ -23,6 +23,19 @@ const chartCombos = {
                 text: 'Fall units'
             }
         }]
+    }, 
+    one: {
+        name: "Vegetation trend",
+        tickInterval: 3 * 30 * 24 * 3600 * 1000,
+        yAxis: [{
+            id: "veg",
+            labels: {
+                format: '{value}%'
+            },
+            title: {
+                text: 'Vegetation index'
+            }
+        }]
     }
 }
 
@@ -51,6 +64,14 @@ const weatherSeries = [{
     color: 'blue',
     yAxis: 'pad'
 }];
+
+const vegSeries = [{
+    key: 'veg',
+    name: 'Vegetation index',
+    unit: '%',
+    color: 'darkgreen',
+    yAxis: 'veg'
+}]
 
 const axiosInstance = axios.create({
     baseURL: 'http://localhost:5000',
@@ -120,13 +141,8 @@ function isPointApplied() {
     return pointApplied;
 }
 
-function handleLayerChange(selectedValue) {
-    // Remove existing chart
-    highChart.destroy();
-
-    // TODO Determine what chart we want now.
-
-    // Make new chart
+function handleLayerChange() {
+    determineChart();
 }
 
 function prepareSeries(payload) {
@@ -137,15 +153,23 @@ function prepareSeries(payload) {
         config.series = timeSeries.map(o => [Date.parse(o['time']), parseFloat(o['value'])])
     })
 
-    // TODO Vegetation
+    // Vegetation
+    const vegData = payload['vegetation'];
+    vegSeries.forEach(function(config){
+        // TODO
+    })
 }
 
 function determineChart() {
     const currentLayer = getLayerId();
-
-    console.log(weatherSeries);
+    console.log(currentLayer);
     
-    initChart(chartCombos.default, weatherSeries)
+
+    if (currentLayer === 'default') {
+        initChart(chartCombos.default, weatherSeries);
+    } else {
+        initChart(chartCombos.one, vegSeries);
+    }
 }
 
 function initChart(chart, seriesArray) {
@@ -159,10 +183,7 @@ function initChart(chart, seriesArray) {
             valueSuffix: o.unit
         }
         return output;
-    })
-
-    console.log(preparedSeries);
-    console.log(chart.yAxis);
+    });
     
     
     highChart = Highcharts.chart('chartContainer', {
