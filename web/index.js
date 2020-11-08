@@ -4,7 +4,38 @@ let highChart;
 const chartCombos = {
     default: {
         name: "Weather data",
-        tickInterval: 3 * 30 * 24 * 3600 * 1000
+        tickInterval: 3 * 30 * 24 * 3600 * 1000,
+        yAxis: [{
+            id: "temp",
+            labels: {
+                format: '{value}°C'
+            },
+            title: {
+                text: 'Temperature'
+            },
+            opposite: true
+        }, {
+            id: "pad",
+            labels: {
+                format: '{value}cm2'
+            },
+            title: {
+                text: 'Fall units'
+            }
+        }]
+    }, 
+    one: {
+        name: "Vegetation trend",
+        tickInterval: 3 * 30 * 24 * 3600 * 1000,
+        yAxis: [{
+            id: "veg",
+            labels: {
+                format: '{value}%'
+            },
+            title: {
+                text: 'Vegetation index'
+            }
+        }]
     }
 }
 
@@ -12,23 +43,35 @@ const weatherSeries = [{
     key: 'maxtempC',
     name: 'Max temperature',
     unit: '°C',
-    color: 'darkgreen'
+    color: 'darkgreen',
+    yAxis: 'temp'
 },{
     key: 'mintempC',
     name: 'Min temperature',
     unit: '°C',
-    color: 'green'
+    color: 'green',
+    yAxis: 'temp'
 },{
     key: 'totalSnow_cm',
-    name: 'Max temperature',
+    name: 'Snow',
     unit: 'cm2',
-    color: 'darkblue'
+    color: 'darkblue',
+    yAxis: 'pad'
 },{
     key: 'precipMM',
-    name: 'The fuck',
-    unit: '°C',
-    color: 'blue'
+    name: 'Precipitation',
+    unit: 'cm2',
+    color: 'blue',
+    yAxis: 'pad'
 }];
+
+const vegSeries = [{
+    key: 'veg',
+    name: 'Vegetation index',
+    unit: '%',
+    color: 'darkgreen',
+    yAxis: 'veg'
+}]
 
 const axiosInstance = axios.create({
     baseURL: 'http://localhost:5000',
@@ -61,6 +104,7 @@ function applyLangLat(){
         return;
     }
 
+    document.getElementById('spinyBoy').style.display = 'block';
     axiosInstance({
         method: 'post',
         url: '/api',
@@ -68,12 +112,12 @@ function applyLangLat(){
             'lat': lat,
             'lng': lng
         },
-        timeout: 10000
+        timeout: 100000
     }).then(function (response) {
         const data = response.data;
-        console.log(data);
         
-        const bbox = data.bbox;
+        const bbox = data['bbox'];
+
         addBoundingBox(bbox);
 
         prepareSeries(data);
@@ -82,7 +126,10 @@ function applyLangLat(){
         pointApplied = true;
         handlePointApplied();
 
-        initChart();
+        document.getElementById('spinyBoy').style.display = 'none';
+    }).catch(function (e) {
+        console.log(e);
+        document.getElementById('spinyBoy').style.display = 'block';
     })
 }
 
@@ -100,30 +147,35 @@ function isPointApplied() {
     return pointApplied;
 }
 
-function handleLayerChange(selectedValue) {
-    // Remove existing chart
-    highChart.destroy();
-
-    // TODO Determine what chart we want now.
-
-    // Make new chart
+function handleLayerChange() {
+    if (pointApplied) {
+            determineChart();
+    }
 }
 
 function prepareSeries(payload) {
     // Weather
     const weatherData = payload['weather'];
     weatherSeries.forEach(function(config) {
-        const timeSeries = weatherData[config.key]
+        const timeSeries = weatherData[config.key];
         config.series = timeSeries.map(o => [Date.parse(o['time']), parseFloat(o['value'])])
-    })
+    });
 
-    // TODO Vegetation
+    // Vegetation
+    const vegData = payload['vegetation'];
+    vegSeries.forEach(function(config){
+        config.series = vegData.map(o => [Date.parse(o['time']), parseFloat(o['value'])])
+    })
 }
 
 function determineChart() {
     const currentLayer = getLayerId();
 
-    initChart(chartCombos.default, weatherSeries)
+    if (currentLayer === 'default') {
+        initChart(chartCombos.default, weatherSeries);
+    } else {
+        initChart(chartCombos.one, vegSeries);
+    }
 }
 
 function initChart(chart, seriesArray) {
@@ -131,9 +183,12 @@ function initChart(chart, seriesArray) {
         let output = {}
         output.name = o.name;
         output.data = o.series;
-    })
-
-    console.log(preparedSeries);
+        output.yAxis = o.yAxis;
+        output.tooltip = {
+            valueSuffix: o.unit
+        }
+        return output;
+    });
     
     
     highChart = Highcharts.chart('chartContainer', {
@@ -141,11 +196,7 @@ function initChart(chart, seriesArray) {
             text: chart.name
         },
     
-        yAxis: {
-            title: {
-                text: 'Some cool metric'
-            }
-        },
+        yAxis: chart.yAxis,
     
         xAxis: {
             type: 'datetime',
@@ -156,9 +207,10 @@ function initChart(chart, seriesArray) {
             enabled: false
         },
 
+        colors: ['darkgreen', 'green', 'darkblue', 'blue'],
+
         plotOptions: {
             series: {
-                color: 'darkgreen',
                 type: 'spline'
             }
         },

@@ -80,9 +80,8 @@
                     <div class="form-group col-12">
                         <label for="selectLayer" class="mr-2">Selected view mode:</label>
                         <select onchange="layerChange()" class="form-control col-8" style="width: 250px" id="selectLayer">
-                            <option value="default">Normal map</option>
-                            <option value="one">Sexy map</option>
-                            <option value="two">Sexier map</option>
+                            <option value="default">General</option>
+                            <option value="one">Vegetation trend</option>
                         </select>
                     </div>
                 </form>
@@ -93,8 +92,8 @@
 
 
             <!-- Coords -->
-            <dl class="row">
-            <dt class="col-1">Lat: </dt>
+            <dl class="row ml-1">
+                <dt class="col-1">Lat: </dt>
                 <dd id="latCoord" class="col-11">None</dd>
                 <dt class="col-1">Lang: </dt>
                 <dd id="langCoord" class="col-11">None</dd>
@@ -107,11 +106,15 @@
 
             <div class="row">
                 
-            <button type="button" id="apply" class="btn btn-dark green-button" disabled="true" style="margin-left: 15px" onclick="applyLangLat();">Apply</button>
+            <button type="button" id="apply" class="btn btn-dark green-button" disabled="true" style="margin-left: 15px" onclick="applyLangLat();">Analyze</button>
             <button type="button" id="clear" class="btn btn-secondary" style="margin-left: 15px; display: none" onclick="clearLangLat();">Clear</button>
         </div>
     </div>
     </div>
+</div>
+<div id="spinyBoy" class="loading">
+    <div class="spinner-border text-success loading-wheel" role="status">
+  <span class="sr-only">Loading...</span>
 </div>
 </body>
 </html>
