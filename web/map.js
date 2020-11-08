@@ -64,6 +64,8 @@ function layerChange() {
     map.removeLayer(currentLayer);
     selectedLayer.addTo(map);
     currentLayer = selectedLayer;
+
+    handleLayerChange(selectedValue);
 }
 
 // This functions needs to be filled out in order to set up all layers.

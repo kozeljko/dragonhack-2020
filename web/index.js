@@ -1,6 +1,8 @@
 let pointApplied = false;
 let highChart;
 
+const chartColours = ['darkgreen', 'green', 'darkblue'];
+
 const axiosInstance = axios.create({
     baseURL: 'http://localhost:5000',
     timeout: 1000
@@ -65,53 +67,48 @@ function isPointApplied() {
     return pointApplied;
 }
 
+function handleLayerChange(selectedValue) {
+    // Remove existing chart
+    highChart.destroy();
+
+    // TODO Determine what chart we want now.
+
+    // Make new chart
+}
+
 function initChart() {
     
     highChart = Highcharts.chart('chartContainer', {
         title: {
-            text: 'Solar Employment Growth by Sector, 2010-2016'
-        },
-    
-        subtitle: {
-            text: 'Source: thesolarfoundation.com'
+            text: 'Top shit graph.'
         },
     
         yAxis: {
             title: {
-                text: 'Number of Employees'
+                text: 'Some cool metric'
             }
         },
     
         xAxis: {
-            accessibility: {
-                rangeDescription: 'Range: 2010 to 2017'
-            }
+            type: 'datetime',
+            tickInterval: 3 * 30 * 24 * 3600 * 1000
         },
     
+        legend: {
+            enabled: false
+        },
+
         plotOptions: {
             series: {
-                label: {
-                    connectorAllowed: false
-                },
-                pointStart: 2010
+                color: 'darkgreen',
+                type: 'spline',
+                pointStart: Date.UTC(2018, 01, 01)
             }
         },
     
         series: [{
-            name: 'Installation',
-            data: [43934, 52503, 57177, 69658, 97031, 119931, 137133, 154175]
-        }, {
-            name: 'Manufacturing',
-            data: [24916, 24064, 29742, 29851, 32490, 30282, 38121, 40434]
-        }, {
-            name: 'Sales & Distribution',
-            data: [11744, 17722, 16005, 19771, 20185, 24377, 32147, 39387]
-        }, {
-            name: 'Project Development',
-            data: [null, null, 7988, 12169, 15112, 22452, 34400, 34227]
-        }, {
-            name: 'Other',
-            data: [12908, 5948, 8105, 11248, 8989, 11816, 18274, 18111]
+            name: '',
+            data: [[Date.UTC(2018, 01, 01), 43934], [Date.UTC(2018, 04, 01), 52503], [Date.UTC(2018, 07, 01), 57177], [Date.UTC(2018, 10, 01), 69658], [Date.UTC(2019, 01, 01), 97031], [Date.UTC(2019, 04, 01), 119931], [Date.UTC(2019, 07, 01), 137133], [Date.UTC(2019, 10, 01), 123123]]
         }]
     });
     
