@@ -30,7 +30,15 @@ document.addEventListener("DOMContentLoaded", function () {
 
 function addMarker(latLng) {
     if (marker === undefined) {
-        marker = L.marker(latLng).addTo(map);
+        let greenIcon = new L.Icon({
+            iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
+            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+            iconSize: [25, 41],
+            iconAnchor: [12, 41],
+            popupAnchor: [1, -34],
+            shadowSize: [41, 41]
+        });
+        marker = L.marker(latLng, {icon: greenIcon}).addTo(map);
     } else {
         marker.setLatLng(latLng);
     }
@@ -41,7 +49,7 @@ function addMarker(latLng) {
 // Bounds are: [[NORTH, WEST], [SOUTH, EAST]]
 function addBoundingBox(bbox) {
     if (rectangle === undefined) {
-        rectangle = L.rectangle(bbox, {color: 'blue', weight: 1}).addTo(map);
+        rectangle = L.rectangle(bbox, {color: 'darkgreen', weight: 1}).addTo(map);
     } else {
         rectangle.setBounds(bbox);
     }
