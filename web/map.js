@@ -26,6 +26,8 @@ document.addEventListener("DOMContentLoaded", function () {
         document.getElementById("apply").disabled = false;
         addMarker(e.latlng);
     });
+
+    map.panTo([46.24189856712798, 14.355354309082033])
 });
 
 function addMarker(latLng) {
