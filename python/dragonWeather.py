@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 from math import sin, cos, sqrt, atan2
+from wwo_hist import retrieve_hist_data
 
 
 def get_bounding_box(x, y, offset):
@@ -20,12 +21,21 @@ def get_bounding_box(x, y, offset):
             (x - x_offset, y - y_offset)]
 
 
-def main():
-    # get coordinates -> change this to ipyleafy later
-    x = float(input("Enter the longitude (x): "))
-    y = float(input("Enter the latitude (y): "))
-    print(get_bounding_box(x, y, 100))
+def weatherDragons(coordinates):
+    # call the weather api and get some weather info
+    frequency = 24
+    start_date = '01-OCT-2020' #'01-JAN-2018'
+    end_date = '01-NOV-2020'
+    api_key = '49ba24e2b3b8412a9e501452200811'
+    location_list = [str(coordinates[1]) + "," + str(coordinates[0])]
 
+    hist_weather_data = retrieve_hist_data(api_key,
+                                           location_list,
+                                           start_date,
+                                           end_date,
+                                           frequency,
+                                           location_label=False,
+                                           export_csv=False,
+                                           store_df=True)
 
-if __name__ == "__main__":
-    main()
+    print(hist_weather_data)

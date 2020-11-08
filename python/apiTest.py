@@ -10,6 +10,7 @@ from sentinelhub import MimeType, CRS, BBox, SentinelHubRequest, SentinelHubDown
 import datetime
 from flask import Flask, json, request, jsonify
 from flask_cors import CORS
+from dragonWeather import weatherDragons
 
 
 def plot_image(image, factor=1.0, clip_range=None, **kwargs):
@@ -132,47 +133,18 @@ def get_classification_request(time_interval, betsiboka_bbox, betsiboka_size, co
     )
 
 
-def main():
-
-    # set configuration
-    CLIENT_ID = ''
-    CLIENT_SECRET = ''
-
-    config = SHConfig()
-    if CLIENT_ID and CLIENT_SECRET:
-        config.sh_client_id = CLIENT_ID
-        config.sh_client_secret = CLIENT_SECRET
-
-    if config.sh_client_id == '' or config.sh_client_secret == '':
-        print("Warning! To use Sentinel Hub services, please provide the credentials (client ID and client secret).")
-
-
+def snowyVegetation(betsiboka_bbox, betsiboka_size, config):
 
     # time TODO -> what time frames
-    start_time = datetime.datetime(2020, 1, 1)
+    start_time = datetime.datetime(2018, 1, 1)
     end_time = datetime.datetime(2020, 11, 1)
 
     # divide into weeks
     # n_chunks = 12 + 1
-    # n_chunks = 88 + 1
-    tmp = (end_time - start_time)
-    n_chunks = tmp.days
-    tdelta = tmp / n_chunks
+    n_chunks = 68 + 1
+    tdelta =  (end_time - start_time) / n_chunks
     edges = [(start_time + i * tdelta).date().isoformat() for i in range(n_chunks)]
     slots = [(edges[i], edges[i + 1]) for i in range(len(edges) - 1)]
-
-
-
-    # set coordinates, bounding box and a resolution (Naklo) TODO -> use input coordinates
-    # [Longitude (x1), Latitude (y1) ... ]
-    # betsiboka_coords_wgs84 = [14.2864, 46.2335, 14.3741, 46.2912] # Naklo
-    betsiboka_coords_wgs84 = [14.3964, 46.2369, 14.4555, 46.2744]
-    resolution = 10
-    betsiboka_bbox = BBox(bbox=betsiboka_coords_wgs84, crs=CRS.WGS84)
-    betsiboka_size = bbox_to_dimensions(betsiboka_bbox, resolution=resolution)
-
-    print(f'Image shape at {resolution} m resolution: {betsiboka_size} pixels')
-
 
     # create a list of requests
     # list_of_requests = [get_true_color_request(slot, betsiboka_bbox, betsiboka_size, config) for slot in slots]
@@ -180,9 +152,7 @@ def main():
     list_of_requests = [request.download_list[0] for request in list_of_requests_pre]
 
     # download data with multiple threads
-    data = SentinelHubDownloadClient(config=config).download(list_of_requests, max_threads=5)
-
-
+    data = SentinelHubDownloadClient(config=config).download(list_of_requests, max_threads=10)
 
     # TODO -> do the multiple file thing
     res = []
@@ -196,7 +166,7 @@ def main():
         # factor 1/255 to scale between 0-1
         # factor 3.5 to increase brightness
         # plot_image(image, factor=3.5 / 255, clip_range=(0, 1))
-        # if i % 4 == 0:
+        # if i in [0,1,2,3,4,5]:
         #    plot_image(image, factor=1 / 255, clip_range=(0, 1))
 
     df = pd.DataFrame(res)
@@ -229,8 +199,36 @@ def magic_endpoint():
     return response
 
 
+def main():
+    # set configuration
+    CLIENT_ID = ''
+    CLIENT_SECRET = ''
+
+    config = SHConfig()
+    if CLIENT_ID and CLIENT_SECRET:
+        config.sh_client_id = CLIENT_ID
+        config.sh_client_secret = CLIENT_SECRET
+
+    if config.sh_client_id == '' or config.sh_client_secret == '':
+        print("Warning! To use Sentinel Hub services, please provide the credentials (client ID and client secret).")
+
+    # set coordinates, bounding box and a resolution (Naklo) TODO -> use input coordinates
+    # [Longitude (x1), Latitude (y1) ... ]
+    # betsiboka_coords_wgs84 = [14.2864, 46.2335, 14.3741, 46.2912]  # Naklo
+    betsiboka_coords_wgs84 = [14.3964, 46.2369, 14.4555, 46.2744]
+    resolution = 10
+    betsiboka_bbox = BBox(bbox=betsiboka_coords_wgs84, crs=CRS.WGS84)
+    betsiboka_size = bbox_to_dimensions(betsiboka_bbox, resolution=resolution)
+
+    print(f'Image shape at {resolution} m resolution: {betsiboka_size} pixels')
+
+    # get snow and vegetation data
+    # snowyVegetation(betsiboka_bbox, betsiboka_size, config)
+    weatherDragons(betsiboka_coords_wgs84)
+
+
 if __name__ == "__main__":
     start = time.time()
     main()
-    api.run()
+    # api.run()
     print("Time taken: " + str(time.time() - start))
