@@ -1,0 +1,10 @@
+.title-thing {
+    padding: 10px 10px 5px 15px;
+    background-color: darkgreen;
+    color: white;
+}
+
+.green-button {
+    background-color: darkgreen;
+    border-color: darkgreen;
+}
