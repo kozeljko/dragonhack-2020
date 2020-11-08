@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 from math import sin, cos, sqrt, atan2
 from wwo_hist import retrieve_hist_data
+import datetime
 
 
 def get_bounding_box(x, y, offset):
@@ -15,17 +16,15 @@ def get_bounding_box(x, y, offset):
     y_offset = dLat * 180 / np.pi
     x_offset = dLon * 180 / np.pi
 
-    return [(x - x_offset, y + y_offset),
-            (x + x_offset, y + y_offset),
-            (x + x_offset, y - y_offset),
-            (x - x_offset, y - y_offset)]
+    return [x + x_offset, y + y_offset,
+            x - x_offset, y - y_offset]
 
 
 def weatherDragons(coordinates):
     # call the weather api and get some weather info
     frequency = 24
-    start_date = '01-OCT-2020' #'01-JAN-2018'
-    end_date = '01-NOV-2020'
+    start_date = '01-OCT-2018' #'01-JAN-2018'
+    end_date = '01-NOV-2018'
     api_key = '49ba24e2b3b8412a9e501452200811'
     location_list = [str(coordinates[1]) + "," + str(coordinates[0])]
 
@@ -38,4 +37,11 @@ def weatherDragons(coordinates):
                                            export_csv=False,
                                            store_df=True)
 
-    print(hist_weather_data)
+    # print(hist_weather_data[0])
+    data = hist_weather_data[0]
+    data['simple_date'] = pd.to_datetime(data['date_time']).dt.to_period('M')
+    print(data)
+
+    # TODO group by simple_date and make sum / max for some columns
+    print(data.columns)
+
