@@ -10,7 +10,7 @@ from sentinelhub import MimeType, CRS, BBox, SentinelHubRequest, SentinelHubDown
 import datetime
 from flask import Flask, json, request, jsonify
 from flask_cors import CORS
-from dragonWeather import weatherDragons
+from dragonWeather import weatherDragons, get_bounding_box
 
 
 def plot_image(image, factor=1.0, clip_range=None, **kwargs):
@@ -191,15 +191,17 @@ def magic_endpoint():
     lng = float(payload['lng'])
 
     print("Received coordinates: (" + str(lat) + ", " + str(lng) + ")")
+    payload = do_magic(lat, lng)
 
-    # TODO Actually call logic.
-    response = jsonify({'bbox': [[lat + 0.05, lng - 0.05], [lat - 0.05, lng + 0.05]]})
+    response = jsonify(payload)
     response.headers.add('Access-Control-Allow-Origin', '*')
 
     return response
 
 
-def main():
+def do_magic(lat, lng):
+    payload = {}
+
     # set configuration
     CLIENT_ID = ''
     CLIENT_SECRET = ''
@@ -215,21 +217,31 @@ def main():
     # set coordinates, bounding box and a resolution (Naklo) TODO -> use input coordinates
     # [Longitude (x1), Latitude (y1) ... ]
     # betsiboka_coords_wgs84 = [14.2864, 46.2335, 14.3741, 46.2912]  # Naklo
-    betsiboka_coords_wgs84 = [14.3964, 46.2369, 14.4555, 46.2744]
+    # betsiboka_coords_wgs84 = [14.3964, 46.2369, 14.4555, 46.2744]  # Sencur
+    bbox = get_bounding_box(lat, lng, 10000)
+    payload['bbox'] = [[bbox[0], bbox[3]], [bbox[2], bbox[1]]]
+
+    #if 1 == 1:
+    #    return payload
+
     resolution = 10
-    betsiboka_bbox = BBox(bbox=betsiboka_coords_wgs84, crs=CRS.WGS84)
+    betsiboka_bbox = BBox(bbox=bbox, crs=CRS.WGS84)
     betsiboka_size = bbox_to_dimensions(betsiboka_bbox, resolution=resolution)
 
     print(f'Image shape at {resolution} m resolution: {betsiboka_size} pixels')
 
     # get snow and vegetation data
-    weatherDragons(betsiboka_coords_wgs84)
+    weatherData = weatherDragons(bbox)
+    payload['weather'] = weatherData
+
     # snowyVegetation(betsiboka_bbox, betsiboka_size, config)
 
+    # TODO include weather data
+    # TODO include veg data
+    return payload
 
 
 if __name__ == "__main__":
     start = time.time()
-    main()
-    # api.run()
+    api.run()
     print("Time taken: " + str(time.time() - start))

@@ -1,7 +1,34 @@
 let pointApplied = false;
 let highChart;
 
-const chartColours = ['darkgreen', 'green', 'darkblue'];
+const chartCombos = {
+    default: {
+        name: "Weather data",
+        tickInterval: 3 * 30 * 24 * 3600 * 1000
+    }
+}
+
+const weatherSeries = [{
+    key: 'maxtempC',
+    name: 'Max temperature',
+    unit: '°C',
+    color: 'darkgreen'
+},{
+    key: 'mintempC',
+    name: 'Min temperature',
+    unit: '°C',
+    color: 'green'
+},{
+    key: 'totalSnow_cm',
+    name: 'Max temperature',
+    unit: 'cm2',
+    color: 'darkblue'
+},{
+    key: 'precipMM',
+    name: 'The fuck',
+    unit: '°C',
+    color: 'blue'
+}];
 
 const axiosInstance = axios.create({
     baseURL: 'http://localhost:5000',
@@ -40,12 +67,18 @@ function applyLangLat(){
         data: {
             'lat': lat,
             'lng': lng
-        }
+        },
+        timeout: 10000
     }).then(function (response) {
         const data = response.data;
+        console.log(data);
+        
         const bbox = data.bbox;
-
         addBoundingBox(bbox);
+
+        prepareSeries(data);
+        determineChart();
+
         pointApplied = true;
         handlePointApplied();
 
@@ -76,11 +109,36 @@ function handleLayerChange(selectedValue) {
     // Make new chart
 }
 
-function initChart() {
+function prepareSeries(payload) {
+    // Weather
+    const weatherData = payload['weather'];
+    weatherSeries.forEach(function(config) {
+        const timeSeries = weatherData[config.key]
+        config.series = timeSeries.map(o => [Date.parse(o['time']), parseFloat(o['value'])])
+    })
+
+    // TODO Vegetation
+}
+
+function determineChart() {
+    const currentLayer = getLayerId();
+
+    initChart(chartCombos.default, weatherSeries)
+}
+
+function initChart(chart, seriesArray) {
+    const preparedSeries = seriesArray.map(o => {
+        let output = {}
+        output.name = o.name;
+        output.data = o.series;
+    })
+
+    console.log(preparedSeries);
+    
     
     highChart = Highcharts.chart('chartContainer', {
         title: {
-            text: 'Top shit graph.'
+            text: chart.name
         },
     
         yAxis: {
@@ -101,15 +159,11 @@ function initChart() {
         plotOptions: {
             series: {
                 color: 'darkgreen',
-                type: 'spline',
-                pointStart: Date.UTC(2018, 01, 01)
+                type: 'spline'
             }
         },
     
-        series: [{
-            name: '',
-            data: [[Date.UTC(2018, 01, 01), 43934], [Date.UTC(2018, 04, 01), 52503], [Date.UTC(2018, 07, 01), 57177], [Date.UTC(2018, 10, 01), 69658], [Date.UTC(2019, 01, 01), 97031], [Date.UTC(2019, 04, 01), 119931], [Date.UTC(2019, 07, 01), 137133], [Date.UTC(2019, 10, 01), 123123]]
-        }]
+        series: preparedSeries
     });
     
 }
