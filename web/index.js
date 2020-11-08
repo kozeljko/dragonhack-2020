@@ -104,6 +104,7 @@ function applyLangLat(){
         return;
     }
 
+    document.getElementById('spinyBoy').style.display = 'block';
     axiosInstance({
         method: 'post',
         url: '/api',
@@ -124,6 +125,10 @@ function applyLangLat(){
 
         pointApplied = true;
         handlePointApplied();
+
+        document.getElementById('spinyBoy').style.display = 'none';
+    }).catch(function (e) {
+        document.getElementById('spinyBoy').style.display = 'block';
     })
 }
 
