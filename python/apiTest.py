@@ -135,7 +135,6 @@ def get_classification_request(time_interval, betsiboka_bbox, betsiboka_size, co
 
 def snowyVegetation(betsiboka_bbox, betsiboka_size, config):
 
-    # time TODO -> what time frames
     start_time = datetime.datetime(2018, 1, 1)
     end_time = datetime.datetime(2020, 11, 1)
 
@@ -154,7 +153,6 @@ def snowyVegetation(betsiboka_bbox, betsiboka_size, config):
     # download data with multiple threads
     data = SentinelHubDownloadClient(config=config).download(list_of_requests, max_threads=10)
 
-    # TODO -> do the multiple file thing
     res = []
     for i, img in enumerate(data):
         image = img["default.tif"]
@@ -162,21 +160,20 @@ def snowyVegetation(betsiboka_bbox, betsiboka_size, config):
         classes["date"] = datetime.datetime.strptime(edges[i], '%Y-%m-%d').date().replace(day=1)
         res.append(classes)
 
-        # plot function
-        # factor 1/255 to scale between 0-1
-        # factor 3.5 to increase brightness
-        # plot_image(image, factor=3.5 / 255, clip_range=(0, 1))
-        # if i in [0,1,2,3,4,5]:
-        #    plot_image(image, factor=1 / 255, clip_range=(0, 1))
-
     df = pd.DataFrame(res)
     # df = df.fillna(0)
 
     proc = pd.DataFrame()
     proc['date'] = df.groupby(['date'], sort=True)['date'].max()
     proc['vegetation'] = df.groupby(['date'], sort=True)['vegetation'].max().round(decimals=2)
-    proc['snow'] = df.groupby(['date'], sort=True)['snow'].max().round(decimals=2)
-    print(proc)
+    # proc['snow'] = df.groupby(['date'], sort=True)['snow'].max().round(decimals=2)
+
+    # return only for vegetation
+    values = proc.to_numpy()
+    res = []
+    for i in range(0, len(values)):
+        res.append({"time": values[i, 0].isoformat(), "value": values[i, 1]})
+    return res
 
 
 api = Flask(__name__)
@@ -224,7 +221,7 @@ def do_magic(lat, lng):
     #if 1 == 1:
     #    return payload
 
-    resolution = 10
+    resolution = 40
     betsiboka_bbox = BBox(bbox=bbox, crs=CRS.WGS84)
     betsiboka_size = bbox_to_dimensions(betsiboka_bbox, resolution=resolution)
 
@@ -234,14 +231,16 @@ def do_magic(lat, lng):
     weatherData = weatherDragons(bbox)
     payload['weather'] = weatherData
 
-    # snowyVegetation(betsiboka_bbox, betsiboka_size, config)
+    vegData = snowyVegetation(betsiboka_bbox, betsiboka_size, config)
+    payload['vegetation'] = vegData
 
-    # TODO include weather data
-    # TODO include veg data
+    # print(payload)
+
     return payload
 
 
 if __name__ == "__main__":
     start = time.time()
     api.run()
+    # do_magic(8.49750009121942, 4.54936981201172)
     print("Time taken: " + str(time.time() - start))

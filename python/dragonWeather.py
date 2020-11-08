@@ -24,9 +24,9 @@ def get_bounding_box(x, y, offset):
 def weatherDragons(coordinates):
     # call the weather api and get some weather info
     frequency = 24
-    start_date = '08-NOV-2019'
-    start_date = '08-SEP-2020'
-    end_date = '08-NOV-2020'
+    start_date = '01-NOV-2019'
+    # start_date = '08-SEP-2020'
+    end_date = '01-NOV-2020'
     api_key = '49ba24e2b3b8412a9e501452200811'
     location_list = [str(coordinates[1]) + "," + str(coordinates[0])]
 
@@ -42,14 +42,23 @@ def weatherDragons(coordinates):
     # print(hist_weather_data[0])
     data = hist_weather_data[0]
     data['simple_date'] = pd.to_datetime(data['date_time']).dt.to_period('M')
-    print(data)
+    # data['maxtempC'] = data['maxtempC'].to_numpy()
+    data = data.astype({'maxtempC': 'int32', 'mintempC': 'int32', 'totalSnow_cm': 'float', 'precipMM': 'float'})
 
-    # TODO group by simple_date and make sum / max for some columns
-    print(data.columns)
+    new_data = pd.DataFrame()
+    new_data['date'] = data.groupby(['simple_date'], sort=True)['date_time'].min()
+    new_data['maxtempC'] = data.groupby(['simple_date'], sort=True)['maxtempC'].mean().round(decimals=1)
+    new_data['mintempC'] = data.groupby(['simple_date'], sort=True)['mintempC'].mean().round(decimals=1)
+    new_data['totalSnow_cm'] = data.groupby(['simple_date'], sort=True)['totalSnow_cm'].sum().round(decimals=1)
+    new_data['precipMM'] = data.groupby(['simple_date'], sort=True)['precipMM'].sum().round(decimals=1)
+    # print(new_data)
 
+    #print(data.columns)
+
+    """
     result = {}
     for key in ['maxtempC', 'mintempC', 'totalSnow_cm', 'precipMM']:
-        iter_date = datetime.date(2019, 11, 8)
+        # iter_date = datetime.date(2019, 11, 8)
         iter_date = datetime.date(2020, 9, 8)
         values = []
 
@@ -59,4 +68,14 @@ def weatherDragons(coordinates):
             iter_date = iter_date + datetime.timedelta(days=1)
 
         result[key] = values
-    return result
+    print(result)
+    """
+
+    new_results = {}
+    for key in ['maxtempC', 'mintempC', 'totalSnow_cm', 'precipMM']:
+        values = new_data[['date', key]].to_numpy()
+        res = []
+        for i in range(0, len(values)):
+            res.append({"time": values[i, 0].date().isoformat(), "value": values[i, 1]})
+        new_results[key] = res
+    return new_results
