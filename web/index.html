@@ -48,29 +48,37 @@
             crossorigin="anonymous"
     ></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.2.0/leaflet.js"></script>
+
+    <script src="https://code.highcharts.com/highcharts.js"></script>
+    <script src="https://code.highcharts.com/modules/series-label.js"></script>
+    <script src="https://code.highcharts.com/modules/exporting.js"></script>
+    <script src="https://code.highcharts.com/modules/export-data.js"></script>
+    <script src="https://code.highcharts.com/modules/accessibility.js"></script>
+
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script src="index.js"></script>
     <script src="map.js"></script>
 </head>
 
 <body>
-<div class="container" style="height: 100%; max-width: 100%">
-    <h1>Dank Nevada memes</h1>
-    <div class="row" style="height: 95%">
-        <div class="col-9 bg-white rounded " style="height: 100%">
+<div  class="title-thing">
+        <h1>Dank Nevada memes</h1>
+</div>
+<div class="container" style="height: 90%; max-width: 100%">
+    <div class="row mt-3" style="height: 100%">
+        <div class="col-9 bg-white rounded" style="height: 100%">
             <div id="sentinelMap"></div>
             <script>
             </script>
         </div>
         <div class="col-3 shadow p-3 bg-white rounded pr-5" style="height: 100%">
             <h2>Options</h2>
-
             <hr/>
             
-            <h3>Layer</h3>
+            <h3>View mode</h3>
                 <form class="form-inline">
                     <div class="form-group col-12">
-                        <label for="selectLayer" class="mr-2">Selected layer:</label>
+                        <label for="selectLayer" class="mr-2">Selected view mode:</label>
                         <select onchange="layerChange()" class="form-control col-8" style="width: 250px" id="selectLayer">
                             <option value="default">Normal map</option>
                             <option value="one">Sexy map</option>
@@ -78,27 +86,31 @@
                         </select>
                     </div>
                 </form>
+
             <hr/>
 
-            <h3>Coordinates</h3>
+            <h3>Details <span id="selectPoint">(Select point)</span></h3>
+
 
             <!-- Coords -->
             <dl class="row">
-                <dt class="col-3">Lat: </dt>
+            <dt class="col-3">Lat: </dt>
                 <dd id="latCoord" class="col-9">None</dd>
                 <dt class="col-3">Lang: </dt>
                 <dd id="langCoord" class="col-9">None</dd>
 
-                <button type="button" class="btn btn-dark" style="margin-left: 15px" onclick="applyLangLat();">Apply</button>
-                <button type="button" class="btn btn-secondary" style="margin-left: 15px" onclick="clearLangLat();">Clear</button>
             </dl>
 
-            <hr/>
+            <div class="row">
+                <div id="chartContainer"></div>
+            </div>
 
-            <h3>Details</h3>
-
-            <span>Select point...</span>
+            <div class="row">
+                
+            <button type="button" id="apply" class="btn btn-dark green-button" disabled="true" style="margin-left: 15px" onclick="applyLangLat();">Apply</button>
+            <button type="button" id="clear" class="btn btn-secondary" style="margin-left: 15px; display: none" onclick="clearLangLat();">Clear</button>
         </div>
+    </div>
     </div>
 </div>
 </body>

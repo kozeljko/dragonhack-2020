@@ -17,6 +17,11 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Function for handling user click.
     map.on('click', function (e) {
+        if (isPointApplied()) {
+            return;
+        }
+
+        document.getElementById("apply").disabled = false;
         addMarker(e.latlng);
     });
 });
